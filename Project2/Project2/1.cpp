@@ -15,8 +15,6 @@ float A[max_N][max_N];
 float B[max_N / 8][max_N * 8];
 
 void f1(int m, int n, float a[][max_N]) {
-	float tot = 0;
-	time_t start, end;
 	__m256 t1, t2, c;
 	for (int k = 0; k < (m < n ? m : n); k++)
 	{
@@ -45,7 +43,6 @@ void f1(int m, int n, float a[][max_N]) {
 		a[k][k] = 1;
 		
 		int j;
-		start = clock();
 #pragma omp parallel for private(t1,t2,c,j) num_threads(6)
 		for (int i = k + 1; i < m; i++)
 		{
@@ -59,8 +56,6 @@ void f1(int m, int n, float a[][max_N]) {
 				_mm256_store_ps(a[i] + j, t2);
 			}
 		}
-		end = clock();
-		tot += (float)(end - start) / 1000;
 		
 		for (int j = n - (n - k - 1) % 8; j < n; j++)
 			for (int i = k + 1; i < m; i++)
@@ -69,7 +64,6 @@ void f1(int m, int n, float a[][max_N]) {
 			a[i][k] = 0;
 		
 	}
-	cout << "Parallel time useage: " << tot << " s" << endl;
 }
 
 
@@ -133,13 +127,10 @@ void f2(int m, int n, float a[][max_N],float b[][max_N*8]) {
 		for (int j = 0; j < n; j++)
 			a[i][j] = b[j / 8][8 * i + j % 8];
 
-	cout << "Parallel time useage: " << tot << " s" << endl;
 }
 
 
 void f3(int m, int n, float a[][max_N]) {
-	float tot = 0;
-	time_t start, end;
 	__m256 t1, t2, c;
 	for (int k = 0; k < (m < n ? m : n); k++)
 	{
@@ -170,7 +161,6 @@ void f3(int m, int n, float a[][max_N]) {
 		int d1 = (m - k - 1) % T == 0 ? (m - k - 1) / T : 1 + (m - k - 1) / T;
 		int d2 = (n - k - 1) / 8;
 		d2 = d2 % (T / 8) == 0 ? d2 / (T / 8) : 1 + d2 / (T / 8);
-		start = clock();
 #pragma omp parallel for private(t1,t2,c,i,j) num_threads(6)
 		for (int l = 0; l < d1*d2; l++)
 		{
@@ -190,15 +180,12 @@ void f3(int m, int n, float a[][max_N]) {
 			}
 		}
 
-		end = clock();
-		tot += (float)(end - start) / 1000;
 		for (int j = n - (n - k - 1) % 8; j < n; j++)
 			for (int i = k + 1; i < m; i++)
 				a[i][j] = a[i][j] - a[i][k] * a[k][j];
 		for (int i = k + 1; i < m; i++)
 			a[i][k] = 0;
 	}
-	cout << "Parallel time useage: " << tot << " s" << endl;
 }
 
 
@@ -221,13 +208,13 @@ int main()
 		}
 	}
 	time_t start, end;
-
+	/*
 	start = clock();
 	f1(m, n, A);
 	end = clock();
 	cout << "Time useage: " << (float)(end - start) / 1000 << " s" << endl;
 	cout << A[m - 1][n - 1] << endl;
-	
+	*/
 	/*
 	start = clock();
 	f2(m, n, A, B);
@@ -235,13 +222,13 @@ int main()
 	cout << "Time useage: " << (float)(end - start) / 1000 << " s" << endl;
 	cout << A[m - 1][n - 1] << endl;
 	*/
-	/*
+	
 	start = clock();
 	f3(m, n, A);
 	end = clock();
 	cout << "Time useage: " << (float)(end - start) / 1000 << " s" << endl;
 	cout << A[m-1][n-1] << endl;
-	*/
+	
 	/*
 	for (int i = 0; i < m; i++)
 	{
